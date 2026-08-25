@@ -34,6 +34,12 @@ def gateway_client():
     return TestClient(app)
 
 
+def test_health_check_returns_ok(gateway_client):
+    response = gateway_client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_create_order_requires_idempotency_key(gateway_client):
     response = gateway_client.post("/orders", json={"item": "widget", "amount_cents": 500})
     assert response.status_code == 400

@@ -106,6 +106,32 @@ curl -X POST http://localhost:8080/orders \
 python scripts/demo_load_test.py
 ```
 
+## Deploying it (single-container, free tier)
+
+`docker-compose.yml` above runs gateway/backend/Redis as three containers,
+which is the right shape for local dev but doesn't fit platforms that only
+run one process per service. `start.sh` + `render.yaml` cover that case: the
+backend runs in the background on its fixed internal port
+(`GATEWAY_BACKEND_URL` already defaults to `http://localhost:9000`) and the
+gateway runs in the foreground on whatever port the platform assigns.
+
+1. **Redis:** create a free database on [Upstash](https://upstash.com)
+   (serverless Redis, no card required) and copy its `rediss://` connection
+   string.
+2. **App:** on [Render](https://render.com), New → Blueprint, point it at
+   this repo — `render.yaml` configures the free web service and the
+   `/health` check automatically. Paste the Upstash URL into the
+   `GATEWAY_REDIS_URL` environment variable in the Render dashboard (left
+   blank in `render.yaml` on purpose — it's a secret).
+3. Render builds the `Dockerfile` and runs `start.sh`. Once live, hit
+   `<your-service>.onrender.com/health` to confirm it's up, then run the
+   same `curl`/`docker-compose` example above against that URL instead of
+   `localhost:8080`.
+
+Free-tier web services spin down after inactivity, so the first request
+after idle time will be slow (cold start) — that's a platform limitation,
+not a bug in the gateway.
+
 ## Known limitations
 
 - **Redis is a single point of failure here.** A production deployment

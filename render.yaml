@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: rate-limited-api-gateway
+    env: docker
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      # Paste a real Redis URL here in the Render dashboard (e.g. an Upstash
+      # rediss:// TLS URL). Left unset here on purpose -- it's a secret, not
+      # a build-time constant, so it isn't committed to the repo.
+      - key: GATEWAY_REDIS_URL
+        sync: false
+      - key: GATEWAY_BACKEND_URL
+        value: http://localhost:9000

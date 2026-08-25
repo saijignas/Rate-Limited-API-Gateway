@@ -30,6 +30,11 @@ def create_app(redis_client, rate_limiter, backend_url: str, cache_ttl_seconds: 
         if not rate_limiter.allow(client_id):
             raise HTTPException(status_code=429, detail="Rate limit exceeded")
 
+    @app.get("/health")
+    def health():
+        """Liveness/health-check endpoint for deploy platforms (e.g. Render)."""
+        return {"status": "ok"}
+
     @app.post("/orders")
     def create_order(
         request: Request,
