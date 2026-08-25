@@ -9,6 +9,29 @@
 > well-known boundary-burst flaw, followed by a token-bucket implementation
 > that fixes it — verified by the same test passing against both.
 
+## Live demo
+
+Deployed on Render (free tier) with Redis on Upstash:
+**https://rate-limited-api-gateway-ep0k.onrender.com**
+
+```bash
+curl -X POST https://rate-limited-api-gateway-ep0k.onrender.com/orders \
+  -H "Idempotency-Key: demo-1" \
+  -H "Content-Type: application/json" \
+  -d '{"item": "widget", "amount_cents": 500}'
+# {"order_id":1,"item":"widget","amount_cents":500,"status":"created"}
+
+curl -X POST https://rate-limited-api-gateway-ep0k.onrender.com/orders \
+  -H "Idempotency-Key: demo-1" \
+  -H "Content-Type: application/json" \
+  -d '{"item": "widget", "amount_cents": 500}'
+# Same order_id:1 back -- the retry didn't create a second order.
+```
+
+Free-tier instance spins down after inactivity, so the first request after
+idle time takes longer (cold start) — that's a platform limitation, not the
+gateway.
+
 ## The problems this solves
 
 - **A client retries a POST after a timeout.** Maybe the first request

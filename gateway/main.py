@@ -89,11 +89,4 @@ def create_app(redis_client, rate_limiter, backend_url: str, cache_ttl_seconds: 
             content={"detail": str(exc), "retry_after_seconds": 1},
         )
 
-    # TEMP-DEBUG: surface the real exception in the response body while
-    # diagnosing the live deploy. Remove before calling this done -- a
-    # production gateway should never leak exception internals to callers.
-    @app.exception_handler(Exception)
-    def handle_unexpected_error(request: Request, exc: Exception):
-        return JSONResponse(status_code=500, content={"debug_detail": f"{type(exc).__name__}: {exc}"})
-
     return app
