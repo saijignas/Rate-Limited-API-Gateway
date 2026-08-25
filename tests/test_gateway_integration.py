@@ -34,6 +34,12 @@ def gateway_client():
     return TestClient(app)
 
 
+def test_root_redirects_to_docs(gateway_client):
+    response = gateway_client.get("/", follow_redirects=False)
+    assert response.status_code in (302, 307)
+    assert response.headers["location"] == "/docs"
+
+
 def test_health_check_returns_ok(gateway_client):
     response = gateway_client.get("/health")
     assert response.status_code == 200

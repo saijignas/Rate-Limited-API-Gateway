@@ -10,7 +10,7 @@ FixedWindowLimiter (to prove its boundary flaw) and TokenBucketLimiter
 
 import httpx
 from fastapi import FastAPI, Header, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from .cache import ResponseCache
 from .idempotency import IdempotencyConflict, IdempotencyStore
@@ -29,6 +29,12 @@ def create_app(redis_client, rate_limiter, backend_url: str, cache_ttl_seconds: 
     def _check_rate_limit(client_id: str) -> None:
         if not rate_limiter.allow(client_id):
             raise HTTPException(status_code=429, detail="Rate limit exceeded")
+
+    @app.get("/", include_in_schema=False)
+    def root():
+        """A visitor hitting the bare domain (e.g. from a resume link) lands
+        on the interactive Swagger docs instead of a bare 404."""
+        return RedirectResponse(url="/docs")
 
     @app.get("/health")
     def health():
