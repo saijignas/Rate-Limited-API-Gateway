@@ -1,4 +1,5 @@
 # Rate-Limited, Idempotent API Gateway
+![CI](https://github.com/saijignas/Rate-Limited-API-Gateway/actions/workflows/ci.yml/badge.svg)
 
 > **TL;DR:** A gateway that sits in front of a slow backend and adds three
 > things no individual backend call gives you for free: per-client rate
